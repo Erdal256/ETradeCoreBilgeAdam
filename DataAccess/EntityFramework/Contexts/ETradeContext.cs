@@ -11,8 +11,8 @@ namespace DataAccess.EntityFramework.Contexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            ConnectionConfig.ConnectionString = "server=DESKTOP-VQ9N1P0\\SEKHARSQL; " +
-                "database=ETradeCoreDB;user id=sa;password=Erdal256;multipleactiveresultsets=true;";
+            //ConnectionConfig.ConnectionString = "server=DESKTOP-VQ9N1P0\\SEKHARSQL; " +
+                //"database=ETradeCoreDB;user id=sa;password=Erdal256;multipleactiveresultsets=true;";
             optionsBuilder.UseSqlServer(ConnectionConfig.ConnectionString);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

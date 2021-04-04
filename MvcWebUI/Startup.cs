@@ -1,6 +1,13 @@
+using AppCore.DataAccess.Configs;
+using Business.Services;
+using Business.Services.Bases;
+using DataAccess.EntityFramework.Contexts;
+using DataAccess.EntityFramework.Repositories;
+using DataAccess.EntityFramework.Repositories.Bases;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +31,21 @@ namespace MvcWebUI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            #region IoC Container
+            // IoC Container kütüphaneleri: Autofac, Ninject
+            //service.AddScpoed() // istek(request) boyunca objenin referansýný (genelde interface veya abstract class) kullandýðýmýz yerde obje(somut class'tan oluþturulacak)
+            //bir kere oluþturulur ve yanýt(response) dönene kadar bu obje hayatta kalýr.
+            //services.AddSingleton() //web uygulamasý baþladýðýn'da objenin referanasýný (genelde interface veya abstract class) kullandýðýmýz yerde obje (somut class'tan oluþturulacak)
+            //bir kere oluþturulur ve uygulama çalýþtýðý süre (IIS üzerinden uygulama durdurulmadýðý veya yeniden baþlatýlmadýðý) sürece bu obje hayatta kalýr.
+            //services.AddTransient() // istek (request) baðýmsýz ihtiyaç olan objenin referansý  (genelde interface veya abstract class) kullandýðýmýz her yerde bu objeni new'ler.
+
+
+            ConnectionConfig.ConnectionString = Configuration.GetConnectionString("ETradeContext");
+            services.AddScoped<DbContext,ETradeContext>();
+            services.AddScoped<ProductRepositoryBase, ProductRepository>();
+            services.AddScoped<IProductService, ProductService>();
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

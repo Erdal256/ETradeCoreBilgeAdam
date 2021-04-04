@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AppCore.Business.Models.Results
+﻿namespace AppCore.Business.Models.Results
 {
     public enum ResultStatus
     {

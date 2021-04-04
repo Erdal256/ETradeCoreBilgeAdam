@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EntityFramework.Repositories.Bases
 {
-    public abstract class CategoryRepositoryBase : RepositoryBase<Category>
+    public abstract class BookRepositoryBase : RepositoryBase<Book>
     {
-        protected CategoryRepositoryBase(DbContext db) : base(db)
+        protected BookRepositoryBase(DbContext db) : base(db)
         {
 
         }

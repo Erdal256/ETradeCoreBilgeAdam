@@ -2,9 +2,9 @@
 
 namespace DataAccess.EntityFramework.Repositories.Bases
 {
-    public class CategoryRepository : CategoryRepositoryBase
+    public class BookRepository : BookRepositoryBase
     {
-        public CategoryRepository(DbContext db) : base(db)
+        public BookRepository(DbContext db) : base(db)
         {
 
         }
