@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DataAccess.EntityFramework.Repositories.Bases;
+using Microsoft.EntityFrameworkCore;
 
-namespace DataAccess.EntityFramework.Repositories.Bases
+namespace DataAccess.EntityFramework.Repositories
 {
     public class CategoryRepository : CategoryRepositoryBase
     {

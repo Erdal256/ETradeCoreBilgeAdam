@@ -6,7 +6,7 @@ namespace AppCore.Business.Models.Results.Bases
 {
     public class ExceptionResult : Result
     {
-        public ExceptionResult(Exception exception, bool showException = false)
+        public ExceptionResult(Exception exception, bool showException = true)
             : base(ResultStatus.Exception,
                   showException == true ?
                   (exception != null ? "Exception: "+ exception.Message + 
@@ -25,7 +25,7 @@ namespace AppCore.Business.Models.Results.Bases
     public class ExceptionResult<TResultType>: Result<TResultType>
     {
 
-        public ExceptionResult(Exception exception, bool showException = false)
+        public ExceptionResult(Exception exception, bool showException = true)
            : base(ResultStatus.Exception,
                  showException == true ?
                  (exception != null ? "Exception: " + exception.Message +

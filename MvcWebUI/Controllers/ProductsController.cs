@@ -9,6 +9,7 @@ using DataAccess.EntityFramework.Contexts;
 using Entities.Entities;
 using Business.Services.Bases;
 using AppCore.Business.Models.Results;
+using Business.Models;
 
 namespace MvcWebUI.Controllers
 {
@@ -16,14 +17,16 @@ namespace MvcWebUI.Controllers
     {
         private readonly ETradeContext _context;
         private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
 
         //public ProductsController(ETradeContext context)
         //{
         //    _context = context;
         //}
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
+            _categoryService = categoryService;
         }
 
         // GET: Products
@@ -34,45 +37,74 @@ namespace MvcWebUI.Controllers
         //}
         public IActionResult Index()
         {
-            try
+
+            var result = _productService.GetQuery();
+            if (result.Status == ResultStatus.Exception)
             {
-                var result = _productService.GetQuery();
-                if(result.Status == ResultStatus.Success)
-                {
-                    return RedirectToAction("Error", "Home");
-                }
-                var model = result.Data.ToList();
-                return View(model);
+                throw new Exception(result.Message);
             }
-            catch (Exception exc)
-            {
-                return RedirectToAction("Error", "Home");
-            }
+            var model = result.Data.ToList();
+            return View(model);
         }
+        //Index aksiyonunun hata aldığı davranışını görebilmek için:
+        //throw new Exception("Test Exception!");
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var product = await _context.Products
+        //        .Include(p => p.Category)
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (product == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(product);
+        //}
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                //return NotFound();
+                return View("NotFound");
             }
 
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
+            var result = _productService.GetQuery();
+            if (result.Status == ResultStatus.Exception)
             {
-                return NotFound();
+                throw new Exception(result.Message);
             }
 
-            return View(product);
+            var model = result.Data.SingleOrDefault(p => p.Id == id.Value);
+
+            if (result.Data == null)
+            {
+                return View("NotFound");
+            }
+            return View(model);
+
         }
 
         // GET: Products/Create
-        public IActionResult Create()
+        //public IActionResult Create()
+        //{
+        //    ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+        //    return View();
+        //}
+        public ActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+            var result = _categoryService.GetQuery();
+            if (result.Status == ResultStatus.Exception)
+            {
+                throw new Exception(result.Message);
+            }
+            ViewBag.Categories = new SelectList(result.Data.ToList(), "Id", "Name");
             return View();
         }
 
@@ -81,34 +113,82 @@ namespace MvcWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,UnitPrice,StockAmount,ExpirationDate,CategoryId,Id,Guid")] Product product)
+        //public async Task<IActionResult> Create([Bind("Name,Description,UnitPrice,StockAmount,ExpirationDate,CategoryId,Id,Guid")] Product product)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(product);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+        //    return View(product);
+        //}
+        public ActionResult Create(ProductModel product)
         {
+            Result productResult;
+            Result<IQueryable<CategoryModel>> categoryResult;
+
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                productResult = _productService.Add(product);
+                if (productResult.Status == ResultStatus.Exception)
+                {
+                    throw new Exception(productResult.Message);
+                }
+                if (productResult.Status == ResultStatus.Success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                categoryResult = _categoryService.GetQuery();
+                if (categoryResult.Status == ResultStatus.Exception)
+                    throw new Exception(categoryResult.Message);
+                ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
+                return View(product);
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+           // ViewBag.Message = productResult.Message;
+            categoryResult = _categoryService.GetQuery();
+            if (categoryResult.Status == ResultStatus.Exception)
+                throw new Exception(categoryResult.Message);
+            ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
             return View(product);
         }
-
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        //public async Task<IActionResult> Edit(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var product = await _context.Products.FindAsync(id);
+        //    if (product == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+        //    return View(product);
+        //}
+        public ActionResult Edit(int? id)
         {
             if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products.FindAsync(id);
+                return View("NotFound");
+            var productResult = _productService.GetQuery();
+            if(productResult.Status == ResultStatus.Exception)
+                throw new Exception(productResult.Message);
+            var product = productResult.Data.SingleOrDefault(p => p.Id == id.Value);
             if (product == null)
+                return View("NoFound");
+            var categoryResult = _categoryService.GetQuery();
+            if(categoryResult.Status == ResultStatus.Exception)
             {
-                return NotFound();
+                throw new Exception(productResult.Message);
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+            ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
             return View(product);
         }
+
+
 
         // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.

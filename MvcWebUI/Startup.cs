@@ -44,7 +44,9 @@ namespace MvcWebUI
             ConnectionConfig.ConnectionString = Configuration.GetConnectionString("ETradeContext");
             services.AddScoped<DbContext,ETradeContext>();
             services.AddScoped<ProductRepositoryBase, ProductRepository>();
+            services.AddScoped<CategoryRepositoryBase, CategoryRepository>();
             services.AddScoped<IProductService, ProductService>();
+             services.AddScoped<ICategoryService, CategoryService>();
             #endregion
         }
 
