@@ -66,12 +66,21 @@ namespace Business.Services
 
         public Result Delete(int id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                _productRepository.Delete(id);
+                return new SuccessResult();
+            }
+            catch (Exception exc)
+            {
+
+                return new ExceptionResult(exc);
+            }
         }
 
         public void Dispose()
         {
-            //throw new System.NotImplementedException();
+            _productRepository.Dispose();
         }
 
         public Result<IQueryable<ProductModel>> GetQuery()
@@ -108,7 +117,43 @@ namespace Business.Services
 
         public Result Update(ProductModel model)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                //var product = _productRepository.GetEntityQuery().SingleOrDefault(p => p.Name.ToUpper() == model.Name.ToUpper().Trim() && p.Id != model.Id);
+                //var product = _productRepository.GetEntityQuery(p => p.Name.ToUpper() == model.Name.ToUpper().Trim() && p.Id != model.Id).SingleOrDefault();
+                //if (product != null)
+                //    return new ErrorResult("Product with the same name exists!");
+
+                if (_productRepository.GetEntityQuery().Any(p => p.Name.ToUpper() == model.Name.ToUpper().Trim() && p.Id != model.Id))
+                    return new ErrorResult("Product with the same name exists!");
+
+                double unitPrice;
+                //unitPrice = Convert.ToDouble(model.UnitPriceText.Trim().Replace(",", "."), new CultureInfo("en"));
+                //unitPrice = Convert.ToDouble(model.UnitPriceText.Trim().Replace(",", "."), CultureInfo.InvariantCulture);
+                //if (!double.TryParse(model.UnitPriceText.Trim().Replace(",", "."), NumberStyles.Any, new CultureInfo("en"), out unitPrice))
+                if (!double.TryParse(model.UnitPriceText.Trim().Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out unitPrice))
+                    return new ErrorResult("Unit price must be a decimal number!");
+
+                model.UnitPrice = unitPrice;
+                model.ExpirationDate = null;
+                if (!string.IsNullOrWhiteSpace(model.ExpirationDateText))
+                    model.ExpirationDate = DateTime.Parse(model.ExpirationDateText, new CultureInfo("en"));
+                var entity = _productRepository.GetEntityQuery(p => p.Id == model.Id).SingleOrDefault();
+
+                entity.CategoryId = model.CategoryId;
+                //entity.//Description = model.Description == null ? null : model.Description.Trim(),
+                entity.Description = model.Description?.Trim();
+                entity.ExpirationDate = model.ExpirationDate;
+                entity.Name = model.Name.Trim();
+                entity.StockAmount = model.StockAmount;
+                entity.UnitPrice = model.UnitPrice;
+                _productRepository.Update(entity);
+                return new SuccessResult();
+            }
+            catch (Exception exc)
+            {
+                return new ExceptionResult(exc);
+            }
         }
     }
 }

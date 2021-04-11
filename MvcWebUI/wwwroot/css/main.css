@@ -211,3 +211,7 @@ ul.admin {
     .records-count span {
         font-weight: bold;
     }
+
+.div-header {
+    padding-top: 25px !important;
+}

@@ -15,14 +15,8 @@ namespace MvcWebUI.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly ETradeContext _context;
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
-
-        //public ProductsController(ETradeContext context)
-        //{
-        //    _context = context;
-        //}
         public ProductsController(IProductService productService, ICategoryService categoryService)
         {
             _productService = productService;
@@ -30,11 +24,6 @@ namespace MvcWebUI.Controllers
         }
 
         // GET: Products
-        //public async Task<IActionResult> Index()
-        //{
-        //    var eTradeContext = _context.Products.Include(p => p.Category);
-        //    return View(await eTradeContext.ToListAsync());
-        //}
         public IActionResult Index()
         {
 
@@ -50,23 +39,6 @@ namespace MvcWebUI.Controllers
         //throw new Exception("Test Exception!");
 
         // GET: Products/Details/5
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var product = await _context.Products
-        //        .Include(p => p.Category)
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (product == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(product);
-        //}
         public IActionResult Details(int? id)
         {
             if (id == null)
@@ -92,11 +64,6 @@ namespace MvcWebUI.Controllers
         }
 
         // GET: Products/Create
-        //public IActionResult Create()
-        //{
-        //    ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
-        //    return View();
-        //}
         public ActionResult Create()
         {
             var result = _categoryService.GetQuery();
@@ -109,21 +76,6 @@ namespace MvcWebUI.Controllers
         }
 
         // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("Name,Description,UnitPrice,StockAmount,ExpirationDate,CategoryId,Id,Guid")] Product product)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(product);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
-        //    return View(product);
-        //}
         public ActionResult Create(ProductModel product)
         {
             Result productResult;
@@ -146,119 +98,70 @@ namespace MvcWebUI.Controllers
                 ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
-           // ViewBag.Message = productResult.Message;
+            // ViewBag.Message = productResult.Message;
             categoryResult = _categoryService.GetQuery();
             if (categoryResult.Status == ResultStatus.Exception)
                 throw new Exception(categoryResult.Message);
             ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
             return View(product);
         }
-        // GET: Products/Edit/5
-        //public async Task<IActionResult> Edit(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var product = await _context.Products.FindAsync(id);
-        //    if (product == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
-        //    return View(product);
-        //}
+        ////GET: Products/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
                 return View("NotFound");
             var productResult = _productService.GetQuery();
-            if(productResult.Status == ResultStatus.Exception)
+            if (productResult.Status == ResultStatus.Exception)
                 throw new Exception(productResult.Message);
             var product = productResult.Data.SingleOrDefault(p => p.Id == id.Value);
             if (product == null)
                 return View("NoFound");
             var categoryResult = _categoryService.GetQuery();
-            if(categoryResult.Status == ResultStatus.Exception)
+            if (categoryResult.Status == ResultStatus.Exception)
             {
                 throw new Exception(productResult.Message);
             }
             ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
             return View(product);
         }
-
-
-
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Description,UnitPrice,StockAmount,ExpirationDate,CategoryId,Id,Guid")] Product product)
+        public ActionResult Edit(ProductModel product)
         {
-            if (id != product.Id)
-            {
-                return NotFound();
-            }
+            Result productResult;
+            Result<IQueryable<CategoryModel>> categoryResult;
 
             if (ModelState.IsValid)
             {
-                try
+                productResult = _productService.Update(product);
+                if (productResult.Status == ResultStatus.Exception)
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    throw new Exception(productResult.Message);
                 }
-                catch (DbUpdateConcurrencyException)
+                if (productResult.Status == ResultStatus.Success)
                 {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
+                categoryResult = _categoryService.GetQuery();
+                if (categoryResult.Status == ResultStatus.Exception)
+                    throw new Exception(categoryResult.Message);
+                ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
+                return View(product);
+            }
+            // ViewBag.Message = productResult.Message;
+            categoryResult = _categoryService.GetQuery();
+            if (categoryResult.Status == ResultStatus.Exception)
+                throw new Exception(categoryResult.Message);
+            ViewBag.Categories = new SelectList(categoryResult.Data.ToList(), "Id", "Name", product.CategoryId);
+            return View(product);
+        }
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            if (!id.HasValue)
+                return View("NotFound");
+            var result = _productService.Delete(id.Value);
+            if (result.Status == ResultStatus.Success)
                 return RedirectToAction(nameof(Index));
-            }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
-            return View(product);
-        }
-
-        // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        // POST: Products/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
+            throw new Exception(result.Message);
         }
     }
 }

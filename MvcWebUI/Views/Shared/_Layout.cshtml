@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>E-Trade | @ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-  
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link href="~/css/main.css" rel="stylesheet" />
 </head>
 <body>
     <div class="wrapper">
         <nav id="sidebar">
-            <div class="sidebar-header">
-                <h3>E-Trade</h3>
+            <div class="sidebar-header div-header">
+                <a class="a-navbar" asp-action="Index" asp-controller="Hone"></a><h5><i class="fasa-fa-shopping-basket"></i>E-Trade</h5>
             </div>
             <ul class="list-unstyled components">
                 <li class="nav-item">
-                    <a class="a-sidebar" asp-action="Index" asp-controller="Products">Product</a>
+                    <a class="a-sidebar" asp-action="Index" asp-controller="Products"><i class="fas fa-clipboard-list"></i>Product</a>
                 </li>
                 <li class="nav-item">
-                    <a class="a-sidebar" href="#"> Categories</a>
+                    <a class="a-sidebar" asp-action="Index" asp-controller="Categories"><i class="fas-fa-clipboard-list"></i>Categories</a>
                 </li>
             </ul>
             <ul class="list-unstyled admin">
@@ -79,6 +79,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/popper.js/umd/popper.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/font-awesome/js/all.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/main.js"></script>
     @RenderSection("Scripts", required: false)

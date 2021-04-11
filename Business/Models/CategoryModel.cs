@@ -1,4 +1,5 @@
 ﻿using AppCore.Records.Bases;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Business.Models
@@ -12,5 +13,7 @@ namespace Business.Models
 
         [StringLength(400, ErrorMessage = "{0} must be maximum {1} characters!")]
         public string Description { get; set; }
+        [DisplayName("Product Count")]
+        public int ProductCount { get; set; }
     }
 }
